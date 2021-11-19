@@ -372,6 +372,20 @@ class MapboxMapController extends ChangeNotifier {
     );
   }
 
+  Future<void> addLayer(
+      String sourceId, String layerId, LayerProperties properties,
+      {String? belowLayerId}) async {
+    if (properties is FillLayerProperties) {
+      addFillLayer(sourceId, layerId, properties);
+    } else if (properties is LineLayerProperties) {
+      addLineLayer(sourceId, layerId, properties);
+    } else if (properties is SymbolLayerProperties) {
+      addSymbolLayer(sourceId, layerId, properties);
+    } else if (properties is CircleLayerProperties) {
+      addCircleLayer(sourceId, layerId, properties);
+    }
+  }
+
   /// Updates user location tracking mode.
   ///
   /// The returned [Future] completes after the change has been made on the
@@ -581,7 +595,7 @@ class MapboxMapController extends ChangeNotifier {
   Future<void> updateLine(Line line, LineOptions changes) async {
     assert(_lines[line.id] == line);
     await _mapboxGlPlatform.updateLine(line, changes);
-    line.options = line.options.copyWith(changes);
+    _lines[line.id] = line.copyWith(options: line.options.copyWith(changes));
     notifyListeners();
   }
 
@@ -942,12 +956,6 @@ class MapboxMapController extends ChangeNotifier {
   Future<void> addImageLayerBelow(
       String layerId, String sourceId, String imageSourceId) {
     return _mapboxGlPlatform.addLayerBelow(layerId, sourceId, imageSourceId);
-  }
-
-  /// Adds a Mapbox image layer to the map's style at render time. Only works for image sources!
-  @Deprecated("This method was renamed to addImageLayer for clarity.")
-  Future<void> addLayer(String imageLayerId, String imageSourceId) {
-    return _mapboxGlPlatform.addLayer(imageLayerId, imageSourceId);
   }
 
   /// Adds a Mapbox image layer below the layer provided with belowLayerId to the map's style at render time. Only works for image sources!

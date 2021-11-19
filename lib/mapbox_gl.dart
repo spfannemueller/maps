@@ -34,6 +34,7 @@ export 'package:mapbox_gl_platform_interface/mapbox_gl_platform_interface.dart'
         MyLocationRenderMode,
         CompassViewPosition,
         AttributionButtonPosition,
+        Annotation,
         Circle,
         CircleOptions,
         Line,
@@ -49,3 +50,5 @@ part 'src/download_region_status.dart';
 part 'src/layer_expressions.dart';
 part 'src/layer_properties.dart';
 part 'src/color_tools.dart';
+part 'src/annotation.dart';
+part 'src/util.dart';
