@@ -13,8 +13,8 @@ class MapboxWebGlPlatform extends MapboxGlPlatform
   dynamic _draggedFeatureId;
   LatLng? _dragOrigin;
   LatLng? _dragPrevious;
+  bool _dragEnabled = true;
 
-  List<String> annotationOrder = [];
   final _featureLayerIdentifiers = Set<String>();
 
   bool _trackCameraPosition = false;
@@ -50,6 +50,9 @@ class MapboxWebGlPlatform extends MapboxGlPlatform
     await _addStylesheetToShadowRoot(_mapElement);
     if (_creationParams.containsKey('initialCameraPosition')) {
       var camera = _creationParams['initialCameraPosition'];
+
+      _dragEnabled = _creationParams['dragEnabled'] ?? true;
+
       if (_creationParams.containsKey('accessToken')) {
         Mapbox.accessToken = _creationParams['accessToken'];
       }
@@ -71,18 +74,12 @@ class MapboxWebGlPlatform extends MapboxGlPlatform
       _map.on('move', _onCameraMove);
       _map.on('moveend', _onCameraIdle);
       _map.on('resize', _onMapResize);
-      _map.on('mouseup', _onMouseUp);
-      _map.on('mousemove', _onMouseMove);
+      if (_dragEnabled) {
+        _map.on('mouseup', _onMouseUp);
+        _map.on('mousemove', _onMouseMove);
+      }
     }
     Convert.interpretMapboxMapOptions(_creationParams['options'], this);
-
-    if (_creationParams.containsKey('annotationOrder')) {
-      annotationOrder = _creationParams['annotationOrder'];
-    }
-  }
-
-  onDrag(dynamic id, LatLng coords) {
-    print("FOOOBAR");
   }
 
   _onMouseDown(Event e) {
@@ -584,7 +581,7 @@ class MapboxWebGlPlatform extends MapboxGlPlatform
       _map.off('mouseenter', layerId, _onMouseEnterFeature);
       _map.off('mousemouve', layerId, _onMouseEnterFeature);
       _map.off('mouseleave', layerId, _onMouseLeaveFeature);
-      _map.off('mousedown', layerId, _onMouseDown);
+      if (_dragEnabled) _map.off('mousedown', layerId, _onMouseDown);
     }
     _featureLayerIdentifiers.clear();
 
@@ -748,7 +745,7 @@ class MapboxWebGlPlatform extends MapboxGlPlatform
       _map.on('mouseenter', layerId, _onMouseEnterFeature);
     }
     _map.on('mouseleave', layerId, _onMouseLeaveFeature);
-    _map.on('mousedown', layerId, _onMouseDown);
+    if (_dragEnabled) _map.on('mousedown', layerId, _onMouseDown);
   }
 
   void _onMouseEnterFeature(_) {

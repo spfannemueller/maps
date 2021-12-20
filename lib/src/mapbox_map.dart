@@ -24,6 +24,7 @@ class MapboxMap extends StatefulWidget {
     this.scrollGesturesEnabled = true,
     this.zoomGesturesEnabled = true,
     this.tiltGesturesEnabled = true,
+    this.dragEnabled = true,
     this.trackCameraPosition = false,
     this.myLocationEnabled = false,
     this.myLocationTrackingMode = MyLocationTrackingMode.None,
@@ -89,6 +90,12 @@ class MapboxMap extends StatefulWidget {
 
   /// True if the map should show a compass when rotated.
   final bool compassEnabled;
+
+  /// True if drag functionality should be enabled.
+  ///
+  /// Disable to avoid performance issues that from the drag event listeners.
+  /// Biggest impact in android
+  final bool dragEnabled;
 
   /// Geographical bounding box for the camera target.
   final CameraTargetBounds cameraTargetBounds;
@@ -229,6 +236,7 @@ class _MapboxMapState extends State<MapboxMap> {
       'options': _MapboxMapOptions.fromWidget(widget).toMap(),
       'accessToken': widget.accessToken,
       'onAttributionClickOverride': widget.onAttributionClick != null,
+      'dragEnabled': widget.dragEnabled
     };
     return _mapboxGlPlatform.buildView(
         creationParams, onPlatformViewCreated, widget.gestureRecognizers);
