@@ -25,7 +25,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
     private var myLocationEnabled = false
     private var scrollingEnabled = true
 
-    private var featureLayerIdentifiers = Set<String>()
+    private var interactiveFeatureLayerIds = Set<String>()
     private var addedShapesByLayer = [String: MGLShape]()
 
     func view() -> UIView {
@@ -463,12 +463,14 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             guard let sourceId = arguments["sourceId"] as? String else { return }
             guard let layerId = arguments["layerId"] as? String else { return }
+            guard let enableInteraction = arguments["enableInteraction"] as? Bool else { return }
             guard let properties = arguments["properties"] as? [String: String] else { return }
             let belowLayerId = arguments["belowLayerId"] as? String
             addSymbolLayer(
                 sourceId: sourceId,
                 layerId: layerId,
                 belowLayerId: belowLayerId,
+                enableInteraction: enableInteraction,
                 properties: properties
             )
             result(nil)
@@ -477,12 +479,14 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             guard let sourceId = arguments["sourceId"] as? String else { return }
             guard let layerId = arguments["layerId"] as? String else { return }
+            guard let enableInteraction = arguments["enableInteraction"] as? Bool else { return }
             guard let properties = arguments["properties"] as? [String: String] else { return }
             let belowLayerId = arguments["belowLayerId"] as? String
             addLineLayer(
                 sourceId: sourceId,
                 layerId: layerId,
                 belowLayerId: belowLayerId,
+                enableInteraction: enableInteraction,
                 properties: properties
             )
             result(nil)
@@ -491,12 +495,14 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             guard let sourceId = arguments["sourceId"] as? String else { return }
             guard let layerId = arguments["layerId"] as? String else { return }
+            guard let enableInteraction = arguments["enableInteraction"] as? Bool else { return }
             guard let properties = arguments["properties"] as? [String: String] else { return }
             let belowLayerId = arguments["belowLayerId"] as? String
             addFillLayer(
                 sourceId: sourceId,
                 layerId: layerId,
                 belowLayerId: belowLayerId,
+                enableInteraction: enableInteraction,
                 properties: properties
             )
             result(nil)
@@ -505,12 +511,14 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             guard let sourceId = arguments["sourceId"] as? String else { return }
             guard let layerId = arguments["layerId"] as? String else { return }
+            guard let enableInteraction = arguments["enableInteraction"] as? Bool else { return }
             guard let properties = arguments["properties"] as? [String: String] else { return }
             let belowLayerId = arguments["belowLayerId"] as? String
             addCircleLayer(
                 sourceId: sourceId,
                 layerId: layerId,
                 belowLayerId: belowLayerId,
+                enableInteraction: enableInteraction,
                 properties: properties
             )
             result(nil)
@@ -519,7 +527,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             guard let layerId = arguments["layerId"] as? String else { return }
             guard let layer = mapView.style?.layer(withIdentifier: layerId) else { return }
-            featureLayerIdentifiers.remove(layerId)
+            interactiveFeatureLayerIds.remove(layerId)
             mapView.style?.removeLayer(layer)
             result(nil)
 
@@ -582,9 +590,9 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
     private func firstFeatureOnLayers(at: CGPoint) -> MGLFeature? {
         guard let style = mapView.style else { return nil }
 
-        // get layers in order (featureLayerIdentifiers is unordered)
+        // get layers in order (interactiveFeatureLayerIds is unordered)
         let clickableLayers = style.layers.filter { layer in
-            featureLayerIdentifiers.contains(layer.identifier)
+            interactiveFeatureLayerIds.contains(layer.identifier)
         }
 
         for layer in clickableLayers.reversed() {
@@ -735,7 +743,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         }
 
         addedShapesByLayer.removeAll()
-        featureLayerIdentifiers.removeAll()
+        interactiveFeatureLayerIds.removeAll()
 
         mapReadyResult?(nil)
 
@@ -799,6 +807,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         sourceId: String,
         layerId: String,
         belowLayerId: String?,
+        enableInteraction: Bool,
         properties: [String: String]
     ) {
         if let style = mapView.style {
@@ -813,7 +822,9 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
                 } else {
                     style.addLayer(layer)
                 }
-                featureLayerIdentifiers.insert(layerId)
+                if enableInteraction {
+                    interactiveFeatureLayerIds.insert(layerId)
+                }
             }
         }
     }
@@ -822,6 +833,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         sourceId: String,
         layerId: String,
         belowLayerId: String?,
+        enableInteraction: Bool,
         properties: [String: String]
     ) {
         if let style = mapView.style {
@@ -833,7 +845,9 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
                 } else {
                     style.addLayer(layer)
                 }
-                featureLayerIdentifiers.insert(layerId)
+                if enableInteraction {
+                    interactiveFeatureLayerIds.insert(layerId)
+                }
             }
         }
     }
@@ -842,6 +856,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         sourceId: String,
         layerId: String,
         belowLayerId: String?,
+        enableInteraction: Bool,
         properties: [String: String]
     ) {
         if let style = mapView.style {
@@ -853,7 +868,9 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
                 } else {
                     style.addLayer(layer)
                 }
-                featureLayerIdentifiers.insert(layerId)
+                if enableInteraction {
+                    interactiveFeatureLayerIds.insert(layerId)
+                }
             }
         }
     }
@@ -862,6 +879,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         sourceId: String,
         layerId: String,
         belowLayerId: String?,
+        enableInteraction: Bool,
         properties: [String: String]
     ) {
         if let style = mapView.style {
@@ -876,7 +894,9 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
                 } else {
                     style.addLayer(layer)
                 }
-                featureLayerIdentifiers.insert(layerId)
+                if enableInteraction {
+                    interactiveFeatureLayerIds.insert(layerId)
+                }
             }
         }
     }
