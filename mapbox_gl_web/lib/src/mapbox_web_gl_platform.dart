@@ -282,30 +282,6 @@ class MapboxWebGlPlatform extends MapboxGlPlatform
     return _map.removeSource(sourceId);
   }
 
-  @override
-  Future<void> setSymbolIconAllowOverlap(bool enable) async {
-    //TODO: to implement
-    print('setSymbolIconAllowOverlap not implemented yet');
-  }
-
-  @override
-  Future<void> setSymbolIconIgnorePlacement(bool enable) async {
-    //TODO: to implement
-    print('setSymbolIconIgnorePlacement not implemented yet');
-  }
-
-  @override
-  Future<void> setSymbolTextAllowOverlap(bool enable) async {
-    //TODO: to implement
-    print('setSymbolTextAllowOverlap not implemented yet');
-  }
-
-  @override
-  Future<void> setSymbolTextIgnorePlacement(bool enable) async {
-    //TODO: to implement
-    print('setSymbolTextIgnorePlacement not implemented yet');
-  }
-
   CameraPosition? _getCameraPosition() {
     if (_trackCameraPosition) {
       final center = _map.getCenter();
@@ -699,19 +675,21 @@ class MapboxWebGlPlatform extends MapboxGlPlatform
     });
   }
 
+  Feature _makeFeature(Map<String, dynamic> geojsonFeature) {
+    return Feature(
+        geometry: Geometry(
+            type: geojsonFeature["geometry"]["type"],
+            coordinates: geojsonFeature["geometry"]["coordinates"]),
+        properties: geojsonFeature["properties"],
+        id: geojsonFeature["properties"]?["id"] ?? geojsonFeature["id"]);
+  }
+
   @override
   Future<void> setGeoJsonSource(
       String sourceId, Map<String, dynamic> geojson) async {
     final source = _map.getSource(sourceId) as GeoJsonSource;
-    final data = FeatureCollection(features: [
-      for (final f in geojson["features"] ?? [])
-        Feature(
-            geometry: Geometry(
-                type: f["geometry"]["type"],
-                coordinates: f["geometry"]["coordinates"]),
-            properties: f["properties"],
-            id: f["id"])
-    ]);
+    final data = FeatureCollection(
+        features: [for (final f in geojson["features"] ?? []) _makeFeature(f)]);
     source.setData(data);
   }
 
@@ -781,5 +759,47 @@ class MapboxWebGlPlatform extends MapboxGlPlatform
 
   void _onMouseLeaveFeature(_) {
     _map.getCanvas().style.cursor = '';
+  }
+
+  @override
+  Future<void> addImageSource(
+      String imageSourceId, Uint8List bytes, LatLngQuad coordinates) {
+    // TODO: implement addImageSource
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> addLayer(String imageLayerId, String imageSourceId) {
+    // TODO: implement addLayer
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> addLayerBelow(
+      String imageLayerId, String imageSourceId, String belowLayerId) {
+    // TODO: implement addLayerBelow
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> updateContentInsets(EdgeInsets insets, bool animated) {
+    // TODO: implement updateContentInsets
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> setFeatureForGeoJsonSource(
+      String sourceId, Map<String, dynamic> geojsonFeature) async {
+    final source = _map.getSource(sourceId) as GeoJsonSource?;
+
+    if (source != null) {
+      final feature = _makeFeature(geojsonFeature);
+      final data = source.data;
+      final index = data.features.indexWhere((f) => f.id == feature.id);
+      if (index >= 0) {
+        data.features[index] = feature;
+        source.setData(data);
+      }
+    }
   }
 }

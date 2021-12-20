@@ -330,54 +330,6 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
   }
 
   @override
-  Future<void> setSymbolIconAllowOverlap(bool enable) async {
-    try {
-      await _channel
-          .invokeMethod('symbolManager#iconAllowOverlap', <String, dynamic>{
-        'iconAllowOverlap': enable,
-      });
-    } on PlatformException catch (e) {
-      return new Future.error(e);
-    }
-  }
-
-  @override
-  Future<void> setSymbolIconIgnorePlacement(bool enable) async {
-    try {
-      await _channel
-          .invokeMethod('symbolManager#iconIgnorePlacement', <String, dynamic>{
-        'iconIgnorePlacement': enable,
-      });
-    } on PlatformException catch (e) {
-      return new Future.error(e);
-    }
-  }
-
-  @override
-  Future<void> setSymbolTextAllowOverlap(bool enable) async {
-    try {
-      await _channel
-          .invokeMethod('symbolManager#textAllowOverlap', <String, dynamic>{
-        'textAllowOverlap': enable,
-      });
-    } on PlatformException catch (e) {
-      return new Future.error(e);
-    }
-  }
-
-  @override
-  Future<void> setSymbolTextIgnorePlacement(bool enable) async {
-    try {
-      await _channel
-          .invokeMethod('symbolManager#textIgnorePlacement', <String, dynamic>{
-        'textIgnorePlacement': enable,
-      });
-    } on PlatformException catch (e) {
-      return new Future.error(e);
-    }
-  }
-
-  @override
   Future<void> addImageSource(
       String imageSourceId, Uint8List bytes, LatLngQuad coordinates) async {
     try {
@@ -578,5 +530,14 @@ class MethodChannelMapboxGl extends MapboxGlPlatform {
   void dispose() {
     super.dispose();
     _channel.setMethodCallHandler(null);
+  }
+
+  @override
+  Future<void> setFeatureForGeoJsonSource(
+      String sourceId, Map<String, dynamic> geojsonFeature) async {
+    await _channel.invokeMethod('source#setFeature', <String, dynamic>{
+      'sourceId': sourceId,
+      'geojsonFeature': jsonEncode(geojsonFeature)
+    });
   }
 }
