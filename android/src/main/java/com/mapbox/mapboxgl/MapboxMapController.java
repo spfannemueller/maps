@@ -558,10 +558,10 @@ final class MapboxMapController
   private String enableSymbolManager(@NonNull Style style, @Nullable String belowLayer) {
     if (symbolManager == null) {
       symbolManager = new SymbolManager(mapView, mapboxMap, style, belowLayer);
-      symbolManager.setIconAllowOverlap(true);
-      symbolManager.setIconIgnorePlacement(true);
-      symbolManager.setTextAllowOverlap(true);
-      symbolManager.setTextIgnorePlacement(true);
+      symbolManager.setIconAllowOverlap(false);
+      symbolManager.setIconIgnorePlacement(false);
+      symbolManager.setTextAllowOverlap(false);
+      symbolManager.setTextIgnorePlacement(false);
       symbolManager.addClickListener(MapboxMapController.this::onAnnotationClick);
     }
     return symbolManager.getLayerId();
